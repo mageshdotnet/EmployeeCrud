@@ -30,14 +30,23 @@ namespace EmployeeManagement.Controllers
         }
 
         //Update Employee
-        [HttpPut]
-        public IActionResult UpdateEmployee([FromBody] Employee employee)
+        [HttpPut("{Id}")]
+        public IActionResult UpdateEmployee(int id,[FromBody] Employee employee)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid ||employee == null ||id != employee.EmpId)
             {
-                return BadRequest(ModelState);
+                 return BadRequest("Invalid data.");
             }
-            _dbContext.Employees.Update(employee);
+            var existing  = _dbContext.Employee.find(id);
+
+            if(existing  == null)
+            {
+              return NotFound($"Employee with ID {id} not found.");
+            }
+               existing .Name = employee.Name;
+               existing .Email = employee.Email;
+               existing .Department = employee.Department;
+           
             _dbContext.SaveChanges();
             return Ok();
         }
@@ -86,7 +95,7 @@ namespace EmployeeManagement.Controllers
             }
             _dbContext.Employees.Remove(emp);
             _dbContext.SaveChanges();
-            return NoContent();
+           return Ok(emp);
 
         }
     }
